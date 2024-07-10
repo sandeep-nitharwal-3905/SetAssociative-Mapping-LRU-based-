@@ -109,32 +109,40 @@ public:
         cout << "\nEnter Data to be Add : ";
         cin >> value;
         int setNo = value % total_sets;
-        searchData(value);
-        v[setNo]->put(lineNo[setNo], value);
-        lineNo[setNo] = (++lineNo[setNo]) % k;
+        int is_hit = searchData(value);
+        if (is_hit != -1)
+        {
+            v[setNo]->put(is_hit, value);
+        }
+        else
+        {
+            v[setNo]->put(lineNo[setNo], value);
+            lineNo[setNo] = (++lineNo[setNo]) % k;
+        }
     }
 
-    void searchData(int value)
+    int searchData(int value)
     {
         int setNo = value % total_sets;
-        bool found = false;
+        int found = -1;
         for (int i = 0; i < k; i++)
         {
             if (v[setNo]->get(i) == value)
             {
-                found = true;
+                found = i;
                 break;
             }
         }
-        if (!found)
+        if (found==-1)
         {
-            cout << "\nNot Found!" << endl;
+            cout << "\n\nNot Found! cache miss !!" << endl;
             cache_miss++;
         }
         else
         {
-            cout << "\nCache Hit!" << endl;
+            cout << "\n\nCache Hit!" << endl;
         }
+        return found;
     }
 
     void totalMiss()
@@ -192,7 +200,7 @@ int main()
     p:
     {
         system("cls");
-        int choice, value;
+        int choice, value, found;
         cout << "========================================================";
         cout << "\n   SETASSOCIATIVE MAPPING MANAGEMENT SYSTEM (LRU Based) \n";
         cout << "========================================================";
@@ -213,7 +221,8 @@ int main()
             system("cls");
             cout << "Enter a value to be Search : ";
             cin >> value;
-            obj.searchData(value);
+            found = obj.searchData(value);
+            found != -1 ? (cout << value << " found on line No : " << found << endl) : (cout << "Cache Miss !!");
             break;
         case 3:
             system("cls");
@@ -227,7 +236,7 @@ int main()
             exit(0);
 
         default:
-            cout << "\n\n Invalid Choice ... Please try again";
+            cout << "\n\nInvalid Choice ... Please try again";
         }
     }
         getch();
