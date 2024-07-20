@@ -85,83 +85,84 @@ public:
 class SetAssociative
 {
 public:
-    int lines, k, cache_miss, total_sets;
-    vector<LRU *> v;
-    vector<int> lineNo;
+    int lines, k, cacheMiss, Tsetes;
+    vector<LRU *> memory;
 
     SetAssociative(int _lines, int _k)
     {
         lines = _lines;
         k = _k;
-        total_sets = (lines / k);
-        cache_miss = 0;
-        v.resize(total_sets); // number of sets
-        lineNo.resize(total_sets);
-        for (int i = 0; i < total_sets; i++)
+        Tsetes = (lines / k); // Total number of Sets
+        cacheMiss = 0;
+        memory.resize(Tsetes); // LRU for each Sets
+        for (int i = 0; i < Tsetes; i++)
         {
-            v[i] = new LRU(k);
+            memory[i] = new LRU(k);
         }
     }
 
     void addData()
     {
-        int value;
-        cout << "\nEnter Data to be Add : ";
-        cin >> value;
-        int setNo = value % total_sets;
-        int is_hit = searchData(value);
-        if (is_hit != -1)
+        int key, value;
+        cout << "\nEnter Data to be Add into {key,value} pair : ";
+        cin >> key >> value;
+        int setNo = key % Tsetes;
+        int found = searchData(key, value);
+        memory[setNo]->put(key, value);
+        if (found == -1)
         {
-            v[setNo]->put(is_hit, value);
+            cout << "Cache Miss !! {" << key << " " << value << "} not found !" << endl;
+            cacheMiss++;
+        }
+        else if (found == 0)
+        {
+            cout << "Key is updated successfully :) " << endl; // no miss count
         }
         else
         {
-            v[setNo]->put(lineNo[setNo], value);
-            lineNo[setNo] = (++lineNo[setNo]) % k;
+            cout << "Cache Hit !! " << "found at line No : " << found << endl;
         }
     }
 
-    int searchData(int value)
+    int searchData(int key, int value)
     {
-        int setNo = value % total_sets;
-        int found = -1;
-        for (int i = 0; i < k; i++)
+        int setNo = key % Tsetes, cnt = 0;
+        for (auto datakey : memory[setNo]->mp)
         {
-            if (v[setNo]->get(i) == value)
+            cnt++;
+            if (key == datakey.first)
             {
-                found = i;
-                break;
+                if (datakey.second->val == value)
+                    return cnt;
+                else
+                    return 0;
             }
         }
-        if (found==-1)
-        {
-            cout << "\n\nNot Found! cache miss !!" << endl;
-            cache_miss++;
-        }
-        else
-        {
-            cout << "\n\nCache Hit!" << endl;
-        }
-        return found;
+        return -1;
     }
 
     void totalMiss()
     {
-        cout << "\nTotal misses are: " << cache_miss << "\n";
+        cout << "\nTotal misses are: " << cacheMiss << "\n";
     }
 
     void cacheView()
     {
         cout << "\nchache View : \n\n";
-        for (int i = 0; i < total_sets; i++)
+        for (int i = 0; i < Tsetes; i++)
         {
+            int cnt = 0;
             cout << "Set No: " << i << endl;
-            for (int j = 0; j < k; j++)
+            for (auto datakey : memory[i]->mp)
             {
-                int value = v[i]->get(j);
-                cout << (value != -1 ? value : 0) << " ";
+                cnt++;
+                cout << "   {" << datakey.first << "," << datakey.second->val << "}" << endl;
             }
-            cout << endl;
+            // reaming line are as {0,0}
+            for (int j = cnt; j < k; j++)
+            {
+                cout << "   {" << 0 << "," << 0 << "}" << endl;
+            }
         }
         cout << "\n";
     }
@@ -169,7 +170,7 @@ public:
 
 bool valadity(int val1, int val2)
 {
-    if (__builtin_popcount(val1) == 1 && __builtin_popcount(val2) == 1 && val1 >= val2)
+    if (__builtin_popcount(val1) == 1 && __builtin_popcount(val2) == 1 && val1 >= val2) // chceking for exect power of 2 or not
     {
         return true;
     }
@@ -200,7 +201,7 @@ int main()
     p:
     {
         system("cls");
-        int choice, value, found;
+        int choice, key, value, found;
         cout << "========================================================";
         cout << "\n   SETASSOCIATIVE MAPPING MANAGEMENT SYSTEM (LRU Based) \n";
         cout << "========================================================";
@@ -219,10 +220,10 @@ int main()
             break;
         case 2:
             system("cls");
-            cout << "Enter a value to be Search : ";
+            cout << "Enter a {key,value} pair to be Search : ";
             cin >> value;
-            found = obj.searchData(value);
-            found != -1 ? (cout << value << " found on line No : " << found << endl) : (cout << "Cache Miss !!");
+            found = obj.searchData(key, value);
+            found != -1 ? (found != 0 ? (cout << value << " found on line No : " << found << endl) : (cout << "key is updated , no miss count :) " << endl)) : (cout << "Cache Miss !! NOT FOUND !!");
             break;
         case 3:
             system("cls");
