@@ -221,7 +221,7 @@ int main()
         case 2:
             system("cls");
             cout << "Enter a {key,value} pair to be Search : ";
-            cin >> value;
+            cin >> key >> value;
             found = obj.searchData(key, value);
             found != -1 ? (found != 0 ? (cout << value << " found on line No : " << found << endl) : (cout << "key is updated , no miss count :) " << endl)) : (cout << "Cache Miss !! NOT FOUND !!");
             break;
